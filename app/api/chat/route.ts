@@ -1,17 +1,31 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 const client = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
 
-const STORE_NAME = process.env.FILE_SEARCH_STORE!;
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const body = await req.json();
 
-    if (!message) {
+    // Soporta:
+    // { message: "hola" }
+    // o
+    // { messages: [{ role: "user", content: "hola" }] }
+
+    let userMessage: string | undefined;
+
+    if (typeof body.message === "string") {
+      userMessage = body.message;
+    } else if (Array.isArray(body.messages)) {
+      const lastUser = body.messages.findLast(
+        (m: any) => m.role === "user"
+      );
+      userMessage = lastUser?.content;
+    }
+
+    if (!userMessage) {
       return NextResponse.json(
         { error: "Falta el mensaje" },
         { status: 400 }
@@ -29,24 +43,14 @@ export async function POST(req: NextRequest) {
 Sos un asistente institucional del Instituto Universitario de Seguridad Pública.
 Respondé únicamente usando la información contenida en los documentos proporcionados.
 Si la información no está disponible, decilo claramente.
-Usá un tono claro, formal y orientado a futuros estudiantes.
 
 Pregunta:
-${message}
-              `.trim(),
+${userMessage}
+              `,
             },
           ],
         },
       ],
-      config: {
-        tools: [
-          {
-            fileSearch: {
-              fileSearchStoreNames: [STORE_NAME],
-            },
-          },
-        ],
-      },
     });
 
     return NextResponse.json({
