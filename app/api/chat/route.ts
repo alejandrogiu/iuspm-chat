@@ -12,46 +12,48 @@ export async function POST(req: NextRequest) {
     const { message } = await req.json();
 
     if (!message) {
-      return NextResponse.json({ error: "Falta el mensaje" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Falta el mensaje" },
+        { status: 400 }
+      );
     }
 
-const response = await client.models.generateContent({
-  model: "gemini-2.5-flash",
-  contents: [
-    {
-      role: "system",
-      parts: [
+    const response = await client.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
         {
-          text: `
+          role: "user",
+          parts: [
+            {
+              text: `
 Sos un asistente institucional del Instituto Universitario de Seguridad Pública.
 Respondé únicamente usando la información contenida en los documentos proporcionados.
 Si la información no está disponible, decilo claramente.
 Usá un tono claro, formal y orientado a futuros estudiantes.
-`
-        }
-      ]
-    },
-    {
-      role: "user",
-      parts: [{ text: message }]
-    }
-  ],
-  config: {
-    tools: [
-      {
-        fileSearch: {
-          fileSearchStoreNames: [STORE_NAME],
+
+Pregunta:
+${message}
+              `.trim(),
+            },
+          ],
         },
+      ],
+      config: {
+        tools: [
+          {
+            fileSearch: {
+              fileSearchStoreNames: [STORE_NAME],
+            },
+          },
+        ],
       },
-    ],
-  },
-});
+    });
 
     return NextResponse.json({
       answer: response.text,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return NextResponse.json(
       { error: "Error procesando la consulta" },
       { status: 500 }
