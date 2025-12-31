@@ -15,25 +15,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Falta el mensaje" }, { status: 400 });
     }
 
-    const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: message,
-      systemInstruction: `
+const response = await client.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: [
+    {
+      role: "system",
+      parts: [
+        {
+          text: `
 Sos un asistente institucional del Instituto Universitario de Seguridad Pública.
 Respondé únicamente usando la información contenida en los documentos proporcionados.
 Si la información no está disponible, decilo claramente.
 Usá un tono claro, formal y orientado a futuros estudiantes.
-`,
-      config: {
-        tools: [
-          {
-            fileSearch: {
-              fileSearchStoreNames: [STORE_NAME],
-            },
-          },
-        ],
+`
+        }
+      ]
+    },
+    {
+      role: "user",
+      parts: [{ text: message }]
+    }
+  ],
+  config: {
+    tools: [
+      {
+        fileSearch: {
+          fileSearchStoreNames: [STORE_NAME],
+        },
       },
-    });
+    ],
+  },
+});
 
     return NextResponse.json({
       answer: response.text,
