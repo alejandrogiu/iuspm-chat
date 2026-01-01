@@ -19,23 +19,6 @@ function resolveStoreName() {
   return store;
 }
 
-type OperationLike = {
-  name?: string;
-  done?: boolean;
-};
-
-async function waitOpDone(operation: OperationLike) {
-  let op = operation;
-
-  while (!op.done) {
-    await new Promise((r) => setTimeout(r, 1000));
-    op = await ai.operations.get({ operation: op });
-  }
-
-  return op;
-}
-
-
 export async function POST(req: Request) {
   try {
     const form = await req.formData();
@@ -45,7 +28,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Falta archivo" }, { status: 400 });
     }
 
-    // Guardar en /tmp para poder pasar un path al SDK
     const bytes = Buffer.from(await file.arrayBuffer());
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "iuspm-"));
     const tmpPath = path.join(tmpDir, file.name);
@@ -53,8 +35,7 @@ export async function POST(req: Request) {
 
     const storeName = resolveStoreName();
 
-    // Sube + indexa al store
-    let op = await ai.fileSearchStores.uploadToFileSearchStore({
+    await ai.fileSearchStores.uploadToFileSearchStore({
       file: tmpPath,
       fileSearchStoreName: storeName,
       config: {
@@ -62,12 +43,10 @@ export async function POST(req: Request) {
       },
     });
 
-    op = await waitOpDone(op);
-
     return NextResponse.json({
       ok: true,
-      displayName: file.name,
-      operationDone: true,
+      message: "Archivo recibido y enviado a indexación",
+      filename: file.name,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error";
