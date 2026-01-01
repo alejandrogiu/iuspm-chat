@@ -49,8 +49,9 @@ export default function Home() {
         ...prev,
         { role: "assistant", content: (data?.answer ?? "").trim() || "No tengo respuesta." },
       ]);
-    } catch (err: any) {
-      setError(err?.message || "Ocurrió un error inesperado");
+    } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Ocurrió un error inesperado";
+    setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -144,7 +145,7 @@ export default function Home() {
             </button>
           </form>
           <p className="text-center text-[10px] text-slate-500 mt-3 uppercase tracking-widest">
-            Seguridad Pública • Consulta Digital
+            Instituto Universitario de Seguridad de la Provincia de Misiones • Argentina • Consulta Digital
           </p>
         </footer>
       </div>
