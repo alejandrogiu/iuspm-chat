@@ -11,7 +11,7 @@ export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Hola 👋 Soy el asistente del **Instituto Universitario de Seguridad Pública**. ¿En qué puedo ayudarte hoy?",
+      content: "Hola 👋 Soy el asistente del **Instituto Universitario de Seguridad**. ¿En qué puedo ayudarte hoy?",
     },
   ]);
   const [input, setInput] = useState("");
