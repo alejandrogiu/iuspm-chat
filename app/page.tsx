@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown"; // Instalá esto: npm install react-markdown
+import ReactMarkdown from "react-markdown"; 
+import Image from "next/image";
 
 type Role = "user" | "assistant";
 type ChatMessage = { role: Role; content: string };
@@ -66,8 +67,15 @@ export default function Home() {
         {/* Header */}
         <header className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)]">
-              <span className="font-bold text-white">IU</span>
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-900 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)] border border-slate-700">
+              <Image
+                src="/iuspm-logo.png"
+                alt="IUSPM"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+                priority
+              />
             </div>
             <div>
               <h1 className="text-lg font-semibold text-white leading-none">IUSPM Chat</h1>
