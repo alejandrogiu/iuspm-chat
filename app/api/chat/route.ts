@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = [
-      "Sos un asistente institucional del Instituto Universitario de Seguridad Pública.",
+      "Sos un asistente institucional del Instituto Universitario de Seguridad de la Provincia de Misiones (IUSPM).",
       "Respondé únicamente usando la información contenida en los documentos proporcionados.",
       "Si la información no está disponible, decilo claramente.",
     ].join("\n");
