@@ -71,9 +71,9 @@ export default function Home() {
               <Image
                 src="/iuspm-logo.png"
                 alt="IUSPM"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
+                fill
+                sizes="40px"
+                className="object-contain p-1"
                 priority
               />
             </div>
