@@ -10,38 +10,33 @@ function resolveStoreName() {
   return store;
 }
 
-// GET: Listar archivos
 export async function GET() {
   try {
     const storeName = resolveStoreName();
     
-    // CAMBIO: El método correcto es listFileSearchStoreFiles
-    const response = await ai.fileSearchStores.listFileSearchStoreFiles({
+    // El método correcto en la v1.34.0 es list dentro de fileSearchStoreFiles
+    const response = await ai.fileSearchStores.fileSearchStoreFiles.list({
       fileSearchStoreName: storeName
     });
 
-    // La respuesta suele venir en 'fileSearchStoreFiles'
     return NextResponse.json({ files: response.fileSearchStoreFiles || [] });
   } catch (e: any) {
-    console.error("Error en GET files:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
 
-// DELETE: Eliminar un archivo
 export async function DELETE(req: Request) {
   try {
     const { fileName } = await req.json(); 
     if (!fileName) return NextResponse.json({ error: "Nombre de archivo requerido" }, { status: 400 });
 
-    // CAMBIO: El método correcto es deleteFileSearchStoreFile
-    await ai.fileSearchStores.deleteFileSearchStoreFile({
+    // El método correcto para borrar es delete dentro de fileSearchStoreFiles
+    await ai.fileSearchStores.fileSearchStoreFiles.delete({
       fileSearchStoreFileName: fileName
     });
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("Error en DELETE file:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
