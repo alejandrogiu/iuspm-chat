@@ -6,9 +6,8 @@ if (!apiKey) {
   throw new Error("Falta GEMINI_API_KEY en variables de entorno");
 }
 
-const client = new GoogleGenAI({ apiKey });
+export const client = new GoogleGenAI({ apiKey });
 
-// 👉 poné acá el store que ya estás usando
 const FILE_SEARCH_STORE = "fileSearchStores/iuspmteststore-ntk4jf8lwt3q";
 
 export async function askGemini(message: string) {
