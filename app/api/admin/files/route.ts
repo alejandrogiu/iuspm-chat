@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 // La ruta correcta para subir 3 niveles y entrar a lib:
-import { client } from "../../../lib/gemini"; 
+import { client } from "../../../../lib/gemini";
 
 export const runtime = "nodejs";
 
