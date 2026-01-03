@@ -1,26 +1,27 @@
 import { NextResponse } from "next/server";
-import { client } from "@/gemini"; // Importamos el cliente que exportamos arriba
+// La ruta correcta para subir 3 niveles y entrar a lib:
+import { client } from "../../../lib/gemini"; 
 
 export const runtime = "nodejs";
 
-function resolveStoreName() {
-  const store = process.env.FILE_SEARCH_STORE || "fileSearchStores/iuspmteststore-ntk4jf8lwt3q";
-  return store;
-}
-
 export async function GET() {
   try {
-    const storeName = resolveStoreName();
+    const storeName = process.env.FILE_SEARCH_STORE || "fileSearchStores/iuspmteststore-ntk4jf8lwt3q";
     
-    // Acceso directo bypasseando el tipado estricto que está fallando
-    const storesApi = (client as any).fileSearchStores;
-    const response = await storesApi.listFileSearchStoreFiles({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const api = (client as any).fileSearchStores;
+    
+    const response = await api.listFileSearchStoreFiles({
       fileSearchStoreName: storeName
     });
 
-    return NextResponse.json({ files: response.fileSearchStoreFiles || [] });
+    return NextResponse.json({ 
+      files: response.fileSearchStoreFiles || [] 
+    });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: e instanceof Error ? e.message : "Error al listar archivos" 
+    }, { status: 500 });
   }
 }
 
@@ -29,13 +30,17 @@ export async function DELETE(req: Request) {
     const { fileName } = await req.json();
     if (!fileName) return NextResponse.json({ error: "Falta fileName" }, { status: 400 });
 
-    const storesApi = (client as any).fileSearchStores;
-    await storesApi.deleteFileSearchStoreFile({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const api = (client as any).fileSearchStores;
+    
+    await api.deleteFileSearchStoreFile({
       fileSearchStoreFileName: fileName
     });
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: e instanceof Error ? e.message : "Error al eliminar" 
+    }, { status: 500 });
   }
 }
