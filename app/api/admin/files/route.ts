@@ -3,6 +3,8 @@ import { client } from "../../../../lib/gemini";
 
 export const runtime = "nodejs";
 
+// app/api/admin/files/route.ts
+
 export async function GET() {
   try {
     const storeName = process.env.FILE_SEARCH_STORE;
@@ -11,33 +13,23 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const api = (client as any).fileSearchStores;
     
-    // CAMBIO CLAVE: En esta versión, el método .list() a menudo espera 
-    // un objeto con la propiedad 'parent' en lugar de 'fileSearchStoreName'
-    const response = await api.documents.list({ 
-      parent: storeName 
-    });
+    // Ejecutamos la consulta
+    const response = await api.documents.list({ parent: storeName });
 
-    return NextResponse.json({ 
-      files: response.documents || [] 
-    });
+    // LOG PARA DEBUG: Mirá esto en los logs de Vercel para ver qué devuelve Google exactamente
+    console.log("Respuesta raw de Google:", JSON.stringify(response));
+
+    // Intentamos extraer la lista de donde sea que esté
+    const files = response.documents || 
+                  response.fileSearchStoreFiles || 
+                  (Array.isArray(response) ? response : []);
+
+    return NextResponse.json({ files });
   } catch (e: any) {
-    console.error("Error detallado en GET /api/admin/files:", e);
-    // Intentamos una segunda opción si la primera falla por el mismo error de parámetros
-    try {
-        const storeName = process.env.FILE_SEARCH_STORE;
-        const api = (client as any).fileSearchStores;
-        // Intento 2: Pasar el string directamente si el objeto falla
-        const response = await api.documents.list(storeName);
-        return NextResponse.json({ files: response.documents || [] });
-    } catch (innerError: any) {
-        return NextResponse.json({ 
-            error: e.message,
-            stack: e.stack 
-        }, { status: 500 });
-    }
+    console.error("Error en GET /api/admin/files:", e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
-
 export async function DELETE(req: Request) {
   try {
     const { fileName } = await req.json();
