@@ -11,22 +11,15 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const api = (client as any).fileSearchStores;
     
-    let response;
+    // Según tu log, el objeto es 'documents' y el método es 'list'
+    const response = await api.documents.list({ 
+      fileSearchStoreName: storeName 
+    });
 
-    // Intentamos la variante 1: métodos agrupados (v1.34.0+)
-    if (api.fileSearchStoreFiles && typeof api.fileSearchStoreFiles.list === 'function') {
-      response = await api.fileSearchStoreFiles.list({ fileSearchStoreName: storeName });
-    } 
-    // Intentamos la variante 2: métodos directos (versiones anteriores o flat)
-    else if (typeof api.listFileSearchStoreFiles === 'function') {
-      response = await api.listFileSearchStoreFiles({ fileSearchStoreName: storeName });
-    } 
-    else {
-      throw new Error("No se encontró el método para listar archivos en el SDK. Estructura: " + Object.keys(api).join(", "));
-    }
-
+    // Ajustamos la respuesta: usualmente si el método es 'documents.list', 
+    // la respuesta trae una propiedad 'documents'
     return NextResponse.json({ 
-      files: response.fileSearchStoreFiles || [] 
+      files: response.documents || [] 
     });
   } catch (e: any) {
     console.error("Error detallado en GET /api/admin/files:", e);
@@ -43,14 +36,10 @@ export async function DELETE(req: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const api = (client as any).fileSearchStores;
 
-    // Variante 1
-    if (api.fileSearchStoreFiles && typeof api.fileSearchStoreFiles.delete === 'function') {
-      await api.fileSearchStoreFiles.delete({ fileSearchStoreFileName: fileName });
-    } 
-    // Variante 2
-    else if (typeof api.deleteFileSearchStoreFile === 'function') {
-      await api.deleteFileSearchStoreFile({ fileSearchStoreFileName: fileName });
-    }
+    // Siguiendo la lógica de 'documents', el borrado debería ser:
+    await api.documents.delete({ 
+      fileSearchStoreFileName: fileName 
+    });
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
