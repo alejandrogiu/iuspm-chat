@@ -11,19 +11,30 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const api = (client as any).fileSearchStores;
     
-    // Según tu log, el objeto es 'documents' y el método es 'list'
+    // CAMBIO CLAVE: En esta versión, el método .list() a menudo espera 
+    // un objeto con la propiedad 'parent' en lugar de 'fileSearchStoreName'
     const response = await api.documents.list({ 
-      fileSearchStoreName: storeName 
+      parent: storeName 
     });
 
-    // Ajustamos la respuesta: usualmente si el método es 'documents.list', 
-    // la respuesta trae una propiedad 'documents'
     return NextResponse.json({ 
       files: response.documents || [] 
     });
   } catch (e: any) {
     console.error("Error detallado en GET /api/admin/files:", e);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    // Intentamos una segunda opción si la primera falla por el mismo error de parámetros
+    try {
+        const storeName = process.env.FILE_SEARCH_STORE;
+        const api = (client as any).fileSearchStores;
+        // Intento 2: Pasar el string directamente si el objeto falla
+        const response = await api.documents.list(storeName);
+        return NextResponse.json({ files: response.documents || [] });
+    } catch (innerError: any) {
+        return NextResponse.json({ 
+            error: e.message,
+            stack: e.stack 
+        }, { status: 500 });
+    }
   }
 }
 
@@ -36,9 +47,9 @@ export async function DELETE(req: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const api = (client as any).fileSearchStores;
 
-    // Siguiendo la lógica de 'documents', el borrado debería ser:
+    // Para el borrado, 'name' suele ser el identificador completo
     await api.documents.delete({ 
-      fileSearchStoreFileName: fileName 
+      name: fileName 
     });
 
     return NextResponse.json({ ok: true });
